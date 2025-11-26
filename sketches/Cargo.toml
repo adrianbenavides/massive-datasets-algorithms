@@ -35,3 +35,7 @@ harness = false
 [[bench]]
 name = "bloom_comparison"
 harness = false
+
+[[bench]]
+name = "hasher_comparison"
+harness = false
