@@ -4,3 +4,14 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+# Core
+rand = "0.10.0-rc.5"
+
+# Hashing libraries
+ahash = "0.8.12"
+xxhash-rust = { version = "0.8.15", features = ["xxh3"] }
+murmur3 = "0.5.2"
+
+[dev-dependencies]
+quickcheck = "1.0"
+quickcheck_macros = "1.0"
