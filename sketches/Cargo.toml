@@ -10,6 +10,7 @@ default = []
 # Core
 bit-vec = "0.8.0"
 rand = "0.10.0-rc.5"
+rand_distr = "0.6.0-rc.0"    # Distribution types (Zipfian, etc.)
 
 # Hashing libraries
 ahash = "0.8.12"
@@ -22,6 +23,15 @@ quickcheck = "1.0.3"
 quickcheck_macros = "1.1.0"
 proptest = "1.9.0"
 
+# External crates for comparison
+fastbloom = "0.14.0"
+pdatastructs = "0.7.0"
+probabilistic-collections = "0.7.0"
+
 [[bench]]
 name = "bloom_throughput"
+harness = false
+
+[[bench]]
+name = "bloom_comparison"
 harness = false
