@@ -1,15 +1,9 @@
 use super::Hasher64;
 use xxhash_rust::xxh3::xxh3_64_with_seed;
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct XXHasher {
     seed: u64,
-}
-
-impl Default for XXHasher {
-    fn default() -> Self {
-        Self { seed: 0 }
-    }
 }
 
 impl XXHasher {

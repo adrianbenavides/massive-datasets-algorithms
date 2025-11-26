@@ -9,7 +9,6 @@ use sketches::filters::bloom::BloomFilter;
 use sketches::filters::traits::ApproximateMembershipQuery;
 use sketches::hashing::AHasher;
 
-
 fn main() {
     println!("=== Basic Bloom Filter Example ===\n");
 

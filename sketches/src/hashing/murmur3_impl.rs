@@ -2,15 +2,9 @@ use super::Hasher64;
 use murmur3::murmur3_x64_128;
 use std::io::Cursor;
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct Murmur3Hasher {
     seed: u32,
-}
-
-impl Default for Murmur3Hasher {
-    fn default() -> Self {
-        Self { seed: 0 }
-    }
 }
 
 impl Murmur3Hasher {
