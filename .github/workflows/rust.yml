@@ -3,8 +3,12 @@ name: Rust CI
 on:
   push:
     branches: [ main, develop ]
+    paths:
+      - 'sketches/**'
   pull_request:
     branches: [ main, develop ]
+    paths:
+      - 'sketches/**'
 
 env:
   CARGO_TERM_COLOR: always
@@ -16,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        rust: [stable, nightly]
+        rust: [ stable, nightly ]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -32,13 +36,15 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-${{ matrix.rust }}-${{ hashFiles('**/Cargo.lock') }}
+            sketches/target
+          key: ${{ runner.os }}-cargo-${{ matrix.rust }}-${{ hashFiles('sketches/**/Cargo.lock') }}
 
       - name: Run tests
+        working-directory: sketches
         run: cargo test --all-features --verbose
 
       - name: Run doc tests
+        working-directory: sketches
         run: cargo test --doc --all-features
 
   clippy:
@@ -59,10 +65,11 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-clippy-${{ hashFiles('**/Cargo.lock') }}
+            sketches/target
+          key: ${{ runner.os }}-cargo-clippy-${{ hashFiles('sketches/**/Cargo.lock') }}
 
       - name: Run clippy
+        working-directory: sketches
         run: cargo clippy --all-targets --all-features -- -D warnings
 
   fmt:
@@ -78,6 +85,7 @@ jobs:
           components: rustfmt
 
       - name: Check formatting
+        working-directory: sketches
         run: cargo fmt --all -- --check
 
   build:
@@ -96,11 +104,13 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-build-${{ hashFiles('**/Cargo.lock') }}
+            sketches/target
+          key: ${{ runner.os }}-cargo-build-${{ hashFiles('sketches/**/Cargo.lock') }}
 
       - name: Build release
+        working-directory: sketches
         run: cargo build --release --all-features --verbose
 
       - name: Build examples
+        working-directory: sketches
         run: cargo build --examples --all-features
