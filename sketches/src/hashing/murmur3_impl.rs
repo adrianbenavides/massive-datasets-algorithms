@@ -19,13 +19,18 @@ impl Murmur3Hasher {
     }
 
     pub fn with_seed(seed: u64) -> Self {
-        Self {
-            seed: seed as u32,
-        }
+        Self { seed: seed as u32 }
     }
 }
 
 impl Hasher64 for Murmur3Hasher {
+    fn with_seed(seed: u64) -> Self
+    where
+        Self: Sized,
+    {
+        Self { seed: seed as u32 }
+    }
+
     fn hash(&self, bytes: &[u8]) -> u64 {
         let mut reader = Cursor::new(bytes);
         let hash128 = murmur3_x64_128(&mut reader, self.seed)
@@ -50,5 +55,10 @@ mod tests {
     #[quickcheck]
     fn prop_murmur3_different_seeds(seed1: u64, seed2: u64, data: Vec<u8>) -> TestResult {
         base_tests::prop_different_seeds(seed1, seed2, data, Murmur3Hasher::with_seed)
+    }
+
+    #[quickcheck]
+    fn prop_murmur3_seed_parameter_varies(param1: u64, param2: u64, data: Vec<u8>) -> TestResult {
+        base_tests::prop_seed_parameter_varies::<Murmur3Hasher>(param1, param2, data)
     }
 }

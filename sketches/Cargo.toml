@@ -3,15 +3,25 @@ name = "sketches"
 version = "0.1.0"
 edition = "2024"
 
+[features]
+default = []
+
 [dependencies]
 # Core
+bit-vec = "0.8.0"
 rand = "0.10.0-rc.5"
 
 # Hashing libraries
 ahash = "0.8.12"
-xxhash-rust = { version = "0.8.15", features = ["xxh3"] }
 murmur3 = "0.5.2"
+xxhash-rust = { version = "0.8.15", features = ["xxh3"] }
 
 [dev-dependencies]
-quickcheck = "1.0"
-quickcheck_macros = "1.0"
+criterion = { version = "0.7.0", features = ["html_reports"] }
+quickcheck = "1.0.3"
+quickcheck_macros = "1.1.0"
+proptest = "1.9.0"
+
+[[bench]]
+name = "bloom_throughput"
+harness = false
