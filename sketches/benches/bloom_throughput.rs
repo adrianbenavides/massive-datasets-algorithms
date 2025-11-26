@@ -10,7 +10,7 @@ fn bloom_insertion(c: &mut Criterion) {
 
     for size in [10_000, 100_000, 1_000_000] {
         group.bench_with_input(BenchmarkId::from_parameter(size), &size, |b, &size| {
-            let mut filter = BloomFilter::new(size, 0.01, AHasher::default());
+            let mut filter = BloomFilter::<_, AHasher>::new(size, 0.01);
             let mut rng = rand::rng();
             b.iter(|| {
                 let item: u64 = rng.random();
@@ -25,7 +25,7 @@ fn bloom_query(c: &mut Criterion) {
     let mut group = c.benchmark_group("bloom_query");
 
     for size in [10_000, 100_000, 1_000_000] {
-        let mut filter = BloomFilter::new(size, 0.01, AHasher::default());
+        let mut filter = BloomFilter::<_, AHasher>::new(size, 0.01);
         for i in 0..size as u64 {
             filter.insert(&i);
         }

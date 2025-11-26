@@ -10,13 +10,13 @@ use sketches::hashing::AHasher;
 #[should_panic(expected = "Capacity must be greater than 0")]
 fn test_zero_capacity_bloom() {
     // Creating a Bloom filter with 0 capacity should panic due to invalid capacity
-    let _ = BloomFilter::<u64, AHasher>::new(0, 0.01, AHasher::default());
+    let _ = BloomFilter::<u64, AHasher>::new(0, 0.01);
 }
 
 #[test]
 fn test_very_low_fpr() {
     // Test with extremely low false positive rate
-    let mut filter = BloomFilter::new(100, 0.0001, AHasher::default());
+    let mut filter = BloomFilter::<_, AHasher>::new(100, 0.0001);
 
     for i in 0..100u64 {
         filter.insert(&i);
@@ -34,7 +34,7 @@ fn test_very_low_fpr() {
 #[test]
 fn test_very_high_fpr() {
     // Test with high false positive rate (less optimal but valid)
-    let mut filter = BloomFilter::new(100, 0.5, AHasher::default());
+    let mut filter = BloomFilter::<_, AHasher>::new(100, 0.5);
 
     for i in 0..50u64 {
         filter.insert(&i);
@@ -49,7 +49,7 @@ fn test_very_high_fpr() {
 #[test]
 fn test_large_capacity() {
     // Test with very large capacity
-    let filter = BloomFilter::<u64, AHasher>::new(10_000_000, 0.01, AHasher::default());
+    let filter = BloomFilter::<u64, AHasher>::new(10_000_000, 0.01);
     assert_eq!(filter.capacity(), 10_000_000);
     assert_eq!(filter.len(), 0);
 }
@@ -57,7 +57,7 @@ fn test_large_capacity() {
 #[test]
 fn test_single_item() {
     // Test with just one item
-    let mut filter = BloomFilter::new(1, 0.01, AHasher::default());
+    let mut filter = BloomFilter::<_, AHasher>::new(1, 0.01);
     filter.insert(&42u64);
 
     assert!(filter.contains(&42u64));
@@ -66,8 +66,8 @@ fn test_single_item() {
 
 #[test]
 fn test_sequential_vs_random_insertions() {
-    let mut filter1 = BloomFilter::new(1000, 0.01, AHasher::default());
-    let mut filter2 = BloomFilter::new(1000, 0.01, AHasher::default());
+    let mut filter1 = BloomFilter::<_, AHasher>::new(1000, 0.01);
+    let mut filter2 = BloomFilter::<_, AHasher>::new(1000, 0.01);
 
     // Sequential insertions
     for i in 0..1000u64 {
@@ -97,7 +97,7 @@ fn test_sequential_vs_random_insertions() {
 #[test]
 fn test_extreme_hash_values() {
     // Test with values that might produce extreme hash values
-    let mut filter = BloomFilter::new(100, 0.01, AHasher::default());
+    let mut filter = BloomFilter::<_, AHasher>::new(100, 0.01);
 
     let extreme_values = vec![
         0u64,
@@ -122,7 +122,7 @@ fn test_extreme_hash_values() {
 #[test]
 fn test_string_items() {
     // Test that Bloom filter works with different types (not just u64)
-    let mut filter = BloomFilter::new(100, 0.01, AHasher::default());
+    let mut filter = BloomFilter::<_, AHasher>::new(100, 0.01);
 
     let items = vec!["hello", "world", "bloom", "filter", "test"];
 
@@ -139,7 +139,7 @@ fn test_string_items() {
 fn test_capacity_vs_actual_insertions() {
     // Test what happens when we exceed capacity
     let capacity = 100;
-    let mut filter = BloomFilter::new(capacity, 0.01, AHasher::default());
+    let mut filter = BloomFilter::<_, AHasher>::new(capacity, 0.01);
 
     // Insert more than capacity
     for i in 0..200u64 {

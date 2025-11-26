@@ -15,7 +15,7 @@ fn main() {
     // Create a Bloom filter for 1000 items with 1% false positive rate
     let capacity = 1000;
     let false_positive_rate = 0.01;
-    let mut filter = BloomFilter::new(capacity, false_positive_rate, AHasher::default());
+    let mut filter = BloomFilter::<_, AHasher>::new(capacity, false_positive_rate);
 
     println!("Created Bloom filter:");
     println!("  Capacity: {}", filter.capacity());

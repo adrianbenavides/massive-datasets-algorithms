@@ -10,10 +10,9 @@ proptest! {
     fn bloom_no_false_negatives(
         items in prop::collection::vec(any::<u64>(), 0..1000)
     ) {
-        let mut filter = BloomFilter::new(
+        let mut filter = BloomFilter::<_, AHasher>::new(
             items.len() + 100,
             0.01,
-            AHasher::default()
         );
 
         for item in &items {
@@ -31,7 +30,7 @@ proptest! {
     fn bloom_empty_contains_nothing(
         items in prop::collection::vec(any::<u64>(), 1..100)
     ) {
-        let filter = BloomFilter::<u64, AHasher>::new(100, 0.01, AHasher::default());
+        let filter = BloomFilter::<u64, AHasher>::new(100, 0.01);
 
         // An empty filter might still return true due to hash collisions
         // but statistically should have very low false positive rate
@@ -53,7 +52,7 @@ proptest! {
     fn bloom_length_increases(
         items in prop::collection::vec(any::<u64>(), 1..100)
     ) {
-        let mut filter = BloomFilter::new(items.len() + 10, 0.01, AHasher::default());
+        let mut filter = BloomFilter::<_, AHasher>::new(items.len() + 10, 0.01);
         let mut prev_len = 0;
 
         for item in &items {
@@ -71,7 +70,7 @@ proptest! {
     fn bloom_duplicate_inserts(
         items in prop::collection::vec(any::<u64>(), 1..50)
     ) {
-        let mut filter = BloomFilter::new(items.len() * 3, 0.01, AHasher::default());
+        let mut filter = BloomFilter::<_, AHasher>::new(items.len() * 3, 0.01);
 
         // Insert each item multiple times
         for item in &items {
@@ -91,7 +90,7 @@ proptest! {
     fn bloom_handles_hash_collisions(
         items in prop::collection::vec(any::<u32>(), 10..100)
     ) {
-        let mut filter = BloomFilter::new(items.len() + 50, 0.01, AHasher::default());
+        let mut filter = BloomFilter::<_, AHasher>::new(items.len() + 50, 0.01);
 
         for item in &items {
             filter.insert(item);
@@ -108,7 +107,7 @@ proptest! {
         capacity in 10usize..1000,
         fpr in 0.001f64..0.1
     ) {
-        let filter = BloomFilter::<u64, AHasher>::new(capacity, fpr, AHasher::default());
+        let filter = BloomFilter::<u64, AHasher>::new(capacity, fpr);
         prop_assert_eq!(filter.capacity(), capacity);
         prop_assert!((filter.false_positive_rate() - fpr).abs() < 1e-10);
     }

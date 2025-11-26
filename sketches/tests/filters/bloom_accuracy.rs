@@ -6,7 +6,7 @@ use sketches::hashing::AHasher;
 fn test_bloom_fpr_within_bounds() {
     let n = 10_000;
     let f = 0.01;
-    let mut filter = BloomFilter::new(n, f, AHasher::default());
+    let mut filter = BloomFilter::<_, AHasher>::new(n, f);
 
     // Insert n items
     for i in 0..n as u64 {

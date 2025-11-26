@@ -4,6 +4,9 @@ use bit_vec::BitVec;
 use std::hash::Hash;
 use std::marker::PhantomData;
 
+/// A standard Bloom filter implementation.
+/// Uses a single contiguous bit array and double hashing for generating multiple hash functions.
+///
 pub struct BloomFilter<T, H: Hasher64> {
     bit_array: BitVec,
     m: usize,     // Number of bits
@@ -11,12 +14,12 @@ pub struct BloomFilter<T, H: Hasher64> {
     n: usize,     // Expected number of elements
     f: f64,       // Configured false positive rate
     count: usize, // Actual number of inserted items
-    hasher: H,
-    _phantom: PhantomData<T>,
+    _phantom_data: PhantomData<T>,
+    _phantom_hasher: PhantomData<H>,
 }
 
 impl<T, H: Hasher64> BloomFilter<T, H> {
-    pub fn new(capacity: usize, false_positive_rate: f64, hasher: H) -> Self {
+    pub fn new(capacity: usize, false_positive_rate: f64) -> Self {
         assert!(capacity > 0, "Capacity must be greater than 0");
         let m = Self::calculate_m(capacity, false_positive_rate);
         let k = Self::calculate_k(m, capacity);
@@ -27,8 +30,8 @@ impl<T, H: Hasher64> BloomFilter<T, H> {
             n: capacity,
             f: false_positive_rate,
             count: 0,
-            hasher,
-            _phantom: PhantomData,
+            _phantom_data: PhantomData,
+            _phantom_hasher: PhantomData,
         }
     }
 
@@ -40,13 +43,28 @@ impl<T, H: Hasher64> BloomFilter<T, H> {
         ((m as f64 / n as f64) * 2f64.ln()).ceil() as usize
     }
 
+    /// Generates k hash positions for an item using double hashing technique.
+    ///
+    /// This method computes only 2 actual hash values and then uses arithmetic operations
+    /// to simulate k independent hash functions. This is significantly more efficient than
+    /// computing k separate hashes.
+    ///
+    /// # Double Hashing Formula
+    /// For each i in 0..k: `h_i(x) = (h1(x) + i * h2(x)) mod m`
+    ///
+    /// # Performance
+    /// - Cost: 2 hash computations + k arithmetic operations
+    /// - Alternative cost: k hash computations
+    /// - Arithmetic operations (add, multiply, modulo) are orders of magnitude faster than hashing
     fn hash_positions(&self, item: &T) -> impl Iterator<Item = usize> + '_
     where
         T: Hash,
     {
-        let hash1 = self.hasher.hash(&self.to_bytes(item)) as u32;
+        // Compute two base hash values (this is where the actual hashing happens)
+        let hash1 = H::hash_with_seed(&self.to_bytes(item), 0) as u32;
         let hash2 = H::hash_with_seed(&self.to_bytes(item), 1) as u32;
 
+        // Generate k positions using only arithmetic on the two hash values
         // Double hashing: h_i(x) = (h1(x) + i*h2(x)) mod m
         (0..self.k).map(move |i| {
             let combined = hash1.wrapping_add((i as u32).wrapping_mul(hash2));
@@ -101,7 +119,7 @@ mod tests {
     fn test_calculate_m() {
         // For n=1000, f=0.01, m should be ~9585
         let m = BloomFilter::<u64, AHasher>::calculate_m(1000, 0.01);
-        assert!(m >= 9500 && m <= 9600);
+        assert!((9500..=9600).contains(&m));
     }
 
     #[test]
@@ -114,7 +132,7 @@ mod tests {
 
     #[test]
     fn test_insert_and_lookup() {
-        let mut bf = BloomFilter::new(100, 0.01, AHasher::default());
+        let mut bf = BloomFilter::<_, AHasher>::new(100, 0.01);
         bf.insert(&42u64);
         bf.insert(&123u64);
 
@@ -125,7 +143,7 @@ mod tests {
 
     #[test]
     fn test_no_false_negatives() {
-        let mut bf = BloomFilter::new(100, 0.01, AHasher::default());
+        let mut bf = BloomFilter::<_, AHasher>::new(100, 0.01);
         let items = vec![1, 2, 3, 42, 100, 255, 1000];
 
         for item in &items {
